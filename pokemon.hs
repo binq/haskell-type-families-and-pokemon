@@ -1,15 +1,48 @@
+{-# LANGUAGE FlexibleContexts, MultiParamTypeClasses, TypeFamilies #-}
+
 module Pokemon where
 
 import Text.Printf (printf)
 import Data.List   (intercalate)
+import Data.Tuple  (swap)
+
+class (Show a, Show (Move a)) => Pokemon a where
+  data Move pokemon :: *
+  pickMove :: a -> Move a
 
 data Fire = Charmander | Charmeleon | Charizard deriving Show
-data Water = Squirtle | Wartortle | Blastoise deriving Show
-data Grass = Bulbasaur | Ivysaur | Venusaur deriving Show
+instance Pokemon Fire where
+  data Move Fire = Ember | FlameThrower | FireBlast deriving Show
+  pickMove Charmander = Ember
+  pickMove Charmeleon = FlameThrower
+  pickMove Charizard = FireBlast
 
-data FireMove = Ember | FlameThrower | FireBlast deriving Show
-data WaterMove = Bubble | WaterGun deriving Show
-data GrassMove = WineWhip deriving Show
+data Water = Squirtle | Wartortle | Blastoise deriving Show
+instance Pokemon Water where
+  data Move Water = Bubble | WaterGun deriving Show
+  pickMove Squirtle = Bubble
+  pickMove _ = WaterGun
+
+data Grass = Bulbasaur | Ivysaur | Venusaur deriving Show
+instance Pokemon Grass where
+  data Move Grass = WineWhip deriving Show
+  pickMove _ = WineWhip
+
+class (Pokemon x, Pokemon y) => Battle x y where
+  battle :: x -> y -> IO ()
+  battle x y = printBattle (show x) (show . pickMove $ x) (show y) (show . pickMove $ y) (show x)
+
+instance Battle Water Fire
+instance Battle Fire Water where
+  battle = flip battle
+
+instance Battle Grass Water
+instance Battle Water Grass where
+  battle = flip battle
+
+instance Battle Fire Grass
+instance Battle Grass Fire where
+  battle = flip battle
 
 append = flip (++)
 newline = "\n"
@@ -21,35 +54,5 @@ battleTemplate = append newline . append newline . intercalate newline $
     "Winner is: %s"
   ]
 
-pickFireMove :: Fire -> FireMove
-pickFireMove Charmander = Ember
-pickFireMove Charmeleon = FlameThrower
-pickFireMove Charizard = FireBlast
-
-pickWaterMove :: Water -> WaterMove
-pickWaterMove Squirtle = Bubble
-pickWaterMove _ = WaterGun
-
-pickGrassMove :: Grass -> GrassMove
-pickGrassMove _ = WineWhip
-
 printBattle :: String -> String -> String -> String -> String -> IO ()
-printBattle x xMove y yMove w = printf battleTemplate x xMove y yMove w
-
-battleWaterVsFire :: Water -> Fire -> IO ()
-battleWaterVsFire x y = printBattle (show x) (show . pickWaterMove $ x) (show y) (show . pickFireMove $ y) (show x)
-
-battleFireVsWater :: Fire -> Water -> IO ()
-battleFireVsWater = flip battleWaterVsFire
-
-battleGrassVsWater :: Grass -> Water -> IO ()
-battleGrassVsWater x y = printBattle (show x) (show . pickGrassMove $ x) (show y) (show . pickWaterMove $ y) (show x)
-
-battleWaterVsGrass :: Water -> Grass -> IO ()
-battleWaterVsGrass = flip battleGrassVsWater
-
-battleFireVsGrass :: Fire -> Grass -> IO ()
-battleFireVsGrass x y = printBattle (show x) (show . pickFireMove $ x) (show y) (show . pickGrassMove $ y) (show x)
-
-battleGrassVsFire :: Grass -> Fire -> IO ()
-battleGrassVsFire = flip battleFireVsGrass
+printBattle x xm y ym w = printf battleTemplate x xm y ym w

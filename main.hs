@@ -4,9 +4,10 @@ import Pokemon
 
 main :: IO ()
 main = do
-  battleWaterVsFire Squirtle Charmander
-  battleFireVsWater Charmeleon Wartortle
-  battleGrassVsWater Bulbasaur Blastoise
-  battleWaterVsGrass Wartortle Ivysaur
-  battleFireVsGrass Charmeleon Ivysaur
-  battleGrassVsFire Venusaur Charizard
+  battle Squirtle Charmander
+  battle Charmeleon Wartortle
+  battle Bulbasaur Blastoise
+  battle Wartortle Ivysaur
+  battle Charmeleon Ivysaur
+  battle Venusaur Charizard
+  putStrLn "Done Fighting"
