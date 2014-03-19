@@ -10,4 +10,7 @@ main = do
   battle Wartortle Ivysaur
   battle Charmeleon Ivysaur
   battle Venusaur Charizard
+  battle Pikachu Venusaur
+  battle Pikachu Charizard
+  battle Pikachu Squirtle
   putStrLn "Done Fighting"
